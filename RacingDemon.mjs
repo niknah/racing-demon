@@ -126,7 +126,6 @@ class RacingDemonPlayer {
     } catch(e) {
       console.error(e);
     }
-    this.hasFinished = true;
   }
 
   increaseTimerCount(stackType) {
@@ -241,6 +240,7 @@ class RacingDemonPlayerWeb extends RacingDemonPlayer {
         const mainStackCount = this.getMainStackCount();
         if(mainStackCount === 0 && !this.finishTime) {
           this.finishTime = new Date().getTime();
+          this.hasFinished = true;
           this.fireOnFinish();
         }
         this.updateMainStackCount(mainStackCount);
