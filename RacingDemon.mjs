@@ -8,6 +8,7 @@ import TimerCount from './TimerCount.mjs';
 
 const config = {
   robotTest: null,
+  debugPlayer: false,
   hintMove: false
 };
 window.config = config;
@@ -185,8 +186,12 @@ class RacingDemonPlayerWeb extends RacingDemonPlayer {
 
   increaseRobotMove(type) {
     super.increaseRobotMove(type);
-    if(config.robotTest !== null) {
-      $('.debug-move',this.div).html(JSON.stringify(this.robotMoves,Object.keys(this.robotMoves).sort(),4));
+    if(config.debugPlayer || config.robotTest !== null) {
+      $('.debug-move',this.div).html(
+        JSON.stringify(this.robotMoves,Object.keys(this.robotMoves).sort(),4)+
+        "\n"+
+        TimerCount.timerCountsToStr(this.timerCounts)
+      );
     }
   }
 
