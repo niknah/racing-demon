@@ -932,7 +932,14 @@ class RacingDemon {
       } else {
         status = 'not same';
       }
-      message=`${cardCode} -> ${move.toStack.className} ${move.type}`;
+      const stackType = move.toStack.getAttribute('data-stack-type');
+      let stackName = '';
+      if(stackType == 'ace') {
+        stackName = `Shared stack #${parseInt(move.toStack.getAttribute('data-ace-stack'))+1}`;
+      } else {
+        stackName = `Personal stack #${parseInt(move.toStack.getAttribute('data-drop-stack'))+1}`;
+      }
+      message=`${cardCode} -> ${stackName} (${move.type})`;
     } else {
       status = (dragElement === null) ? 'ok' : 'not same';
       message=`flip main stack`;
@@ -976,12 +983,12 @@ class RacingDemon {
     const thisPlayer = this.players[playerId];
     if(thisPlayer) {
       let hasNoCount = false;
-console.log('save timer counts, average mSecs',thisPlayer.mSecsSinceCardEvent(), TimerCount.timerCountsToStr(thisPlayer.timerCounts));
       if(thisPlayer.mSecsSinceCardEvent() >= 60000) {
         // Player has been idle, let's not record their time.
         return false;
       }
 
+console.log('save timer counts, average mSecs',thisPlayer.mSecsSinceCardEvent(), TimerCount.timerCountsToStr(thisPlayer.timerCounts));
       for(const timerCount of Object.values(thisPlayer.timerCounts)) {
         if(!timerCount.count) {
           hasNoCount = true;
@@ -1186,7 +1193,7 @@ console.log('save timer counts, average mSecs',thisPlayer.mSecsSinceCardEvent(),
       if(lastMSecsPerMove) {
         this.robotTimerMSecs = lastMSecsPerMove;
       }
-      console.log('lastMSecsPerMove',lastMSecsPerMove, this.timerCounts);
+      console.log('lastMSecsPerMove',lastMSecsPerMove, TimerCount.timerCountsToStr(this.timerCounts), this.timerCounts, );
     }
   }
 
