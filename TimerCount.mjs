@@ -38,7 +38,7 @@ export default class TimerCount {
   static timerCountsToStr(timerCounts) {
     let str = '';
     for(const timerCount of Object.values(timerCounts)) {
-      str += `${timerCount.name} timerCount.mSecsPerMove()\n`;
+      str += `${timerCount.name} ${timerCount.mSecsPerMove()}\n`;
     }
     return str;
   }
