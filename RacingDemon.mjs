@@ -764,26 +764,26 @@ class RacingDemonRobotTurn {
       return dropToAceMove;
     }
 
-    const firstToAceDropStackMove = this.findPreFirstToAceDropStackMove();
-    if(firstToAceDropStackMove) {
-      return firstToAceDropStackMove;
-    }
-
     // can we put drop stack top to drop stack bottom
     const stackMove = this.findInterDropStackMove();
     if(stackMove) {
       return stackMove;
     }
 
-    const aceStackMove = this.findMainToAceStackMove();
-    if(aceStackMove) {
-      return aceStackMove;
-    }
-
     // can we put main into bottom of drop stack?
     const mainStackMove = this.findMainStackToDropMove();
     if(mainStackMove) {
       return mainStackMove;
+    }
+
+    const firstToAceDropStackMove = this.findPreFirstToAceDropStackMove();
+    if(firstToAceDropStackMove) {
+      return firstToAceDropStackMove;
+    }
+
+    const aceStackMove = this.findMainToAceStackMove();
+    if(aceStackMove) {
+      return aceStackMove;
     }
   }
 
