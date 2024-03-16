@@ -425,7 +425,7 @@
     static timerCountsToStr(timerCounts) {
       let str = "";
       for (const timerCount of Object.values(timerCounts)) {
-        str += `${timerCount.name} timerCount.mSecsPerMove()
+        str += `${timerCount.name} ${timerCount.mSecsPerMove()}
 `;
       }
       return str;
@@ -443,6 +443,7 @@
   // RacingDemon.mjs
   var config = {
     robotTest: null,
+    debugPlayer: false,
     hintMove: false
   };
   window.config = config;
@@ -541,7 +542,6 @@
       } catch (e) {
         console.error(e);
       }
-      this.hasFinished = true;
     }
     increaseTimerCount(stackType) {
       const now = (/* @__PURE__ */ new Date()).getTime();
@@ -590,8 +590,10 @@
     }
     increaseRobotMove(type) {
       super.increaseRobotMove(type);
-      if (config.robotTest !== null) {
-        $(".debug-move", this.div).html(JSON.stringify(this.robotMoves, Object.keys(this.robotMoves).sort(), 4));
+      if (config.debugPlayer || config.robotTest !== null) {
+        $(".debug-move", this.div).html(
+          JSON.stringify(this.robotMoves, Object.keys(this.robotMoves).sort(), 4) + "\n" + TimerCount.timerCountsToStr(this.timerCounts)
+        );
       }
     }
     //  setCardsElement(elem) {
@@ -636,6 +638,7 @@
           const mainStackCount = this.getMainStackCount();
           if (mainStackCount === 0 && !this.finishTime) {
             this.finishTime = (/* @__PURE__ */ new Date()).getTime();
+            this.hasFinished = true;
             this.fireOnFinish();
           }
           this.updateMainStackCount(mainStackCount);
@@ -908,7 +911,7 @@
       this.checkTooQuick = b;
     }
     isMoveToStackTooQuick(playerId, droppable, lastCard) {
-      if (config.robotTest !== null || this.checkTooQuick) {
+      if (config.robotTest !== null || !this.checkTooQuick) {
         return false;
       }
       const mSecsSinceLastDrop = (/* @__PURE__ */ new Date()).getTime() - droppable.lastCardDrop;
@@ -949,7 +952,8 @@
             }
           }
           if (moveOk) {
-          } else if (moveLastCards || this.emptyDropStacks > 1) {
+          } else if (moveLastCards || // have more than one empty drop stack
+          this.emptyDropStacks > 1 && this.mainCard.num != CardNumbers.KingNumber && this.mainCard.num != 2) {
             moveOk = true;
           } else {
             continue;
@@ -1047,21 +1051,21 @@
       if (dropToAceMove) {
         return dropToAceMove;
       }
-      const firstToAceDropStackMove = this.findPreFirstToAceDropStackMove();
-      if (firstToAceDropStackMove) {
-        return firstToAceDropStackMove;
-      }
       const stackMove = this.findInterDropStackMove();
       if (stackMove) {
         return stackMove;
       }
-      const aceStackMove = this.findMainToAceStackMove();
-      if (aceStackMove) {
-        return aceStackMove;
-      }
       const mainStackMove = this.findMainStackToDropMove();
       if (mainStackMove) {
         return mainStackMove;
+      }
+      const firstToAceDropStackMove = this.findPreFirstToAceDropStackMove();
+      if (firstToAceDropStackMove) {
+        return firstToAceDropStackMove;
+      }
+      const aceStackMove = this.findMainToAceStackMove();
+      if (aceStackMove) {
+        return aceStackMove;
       }
     }
     getWaitFromMove(move) {
@@ -1103,7 +1107,7 @@
     static getNextMove(racingDemon, player) {
       const racingDemonRobotTurn = new _RacingDemonRobotTurn(racingDemon);
       racingDemonRobotTurn.setPlayer(player);
-      racingDemonRobotTurn.setCheckTooQuick();
+      racingDemonRobotTurn.setCheckTooQuick(false);
       return racingDemonRobotTurn.robotFindNextStep();
     }
     static doPlayerTurn(racingDemon, player) {
@@ -1191,7 +1195,14 @@
         } else {
           status = "not same";
         }
-        message = `${cardCode} -> ${move.toStack.className} ${move.type}`;
+        const stackType = move.toStack.getAttribute("data-stack-type");
+        let stackName = "";
+        if (stackType == "ace") {
+          stackName = `Shared stack #${parseInt(move.toStack.getAttribute("data-ace-stack")) + 1}`;
+        } else {
+          stackName = `Personal stack #${parseInt(move.toStack.getAttribute("data-drop-stack")) + 1}`;
+        }
+        message = `${cardCode} -> ${stackName} (${move.type})`;
       } else {
         status = dragElement === null ? "ok" : "not same";
         message = `flip main stack`;
@@ -1230,10 +1241,10 @@
       const thisPlayer = this.players[playerId];
       if (thisPlayer) {
         let hasNoCount = false;
-        console.log("save timer counts, average mSecs", thisPlayer.mSecsSinceCardEvent(), TimerCount.timerCountsToStr(thisPlayer.timerCounts));
         if (thisPlayer.mSecsSinceCardEvent() >= 6e4) {
           return false;
         }
+        console.log("save timer counts, average mSecs", thisPlayer.mSecsSinceCardEvent(), TimerCount.timerCountsToStr(thisPlayer.timerCounts));
         for (const timerCount of Object.values(thisPlayer.timerCounts)) {
           if (!timerCount.count) {
             hasNoCount = true;
@@ -1414,7 +1425,7 @@ Continue playing?`)) {
         if (lastMSecsPerMove) {
           this.robotTimerMSecs = lastMSecsPerMove;
         }
-        console.log("lastMSecsPerMove", lastMSecsPerMove, this.timerCounts);
+        console.log("lastMSecsPerMove", lastMSecsPerMove, TimerCount.timerCountsToStr(this.timerCounts), this.timerCounts);
       }
     }
     initGui(div) {
