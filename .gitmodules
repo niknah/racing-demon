@@ -1,0 +1,3 @@
+[submodule "cardsJS"]
+	path = cardsJS
+	url = https://github.com/niknah/cardsJS

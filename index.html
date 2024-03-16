@@ -1,0 +1,59 @@
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="cardsJS/dist/cards.css">
+    <link rel="stylesheet" type="text/css" href="RacingDemon.css">
+    <title>Racing Demon</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+  </head>
+  <body>
+
+  <div id='lobby-area' class='lobby-area'>
+    <label for='players-count'>Players:</label><input type='number' id='players-count' class='players-count' value='6' size='3' />
+    <div class='instructions'>
+      <ul>
+        <li>Each stack at the top takes the same suit from Ace to King.  You can only put an Ace down as the first card</li>
+        <li>Each player's stack accepts a card one number smaller than the existing card with an opposite color(red / black).</li>
+      </ul>
+      <p>Be the first to have an empty hand.</p>
+      <p>Watch the computer to see how it works.</p>
+    </div>
+    <button class='start-game'>Start</button>
+  </div>
+
+  <div id='play-area' class='play-area hide-area'>
+    <div class='ace-stacks'>
+      <div class="ace-stack hand fan " data-ace-stack="0" data-stack-type="ace" data-fan="radius: 50; spacing: 0.07"></div>
+    </div>
+    <div class='next-move'></div>
+  </div>
+  <div style='display: none'>
+    <div id='player-template' class='player-template player-area'>
+      <div class='player-main-row'>
+        <div class="hand hhand-compact take-stack" data-hand="spacing: 0.14;">
+        </div>
+        <div><label>Cards:</label> <span class='main-stack-count'></span></div>
+        <h3 class='player-name'></h3>
+        <span class='player-rank'></span>
+        <pre class='debug-move'></pre>
+      </div>
+      <div class='drop-stacks'>
+        <div class="hand fan drop-stack drop-stack-0" data-stack-type="drop" data-hand="spacing: 0.25; flow: vertical; width: 70"></div>
+        <div class="hand fan drop-stack drop-stack-1" data-stack-type="drop" data-hand="spacing: 0.25; flow: vertical; width: 70"></div>
+        <div class="hand fan drop-stack drop-stack-2" data-stack-type="drop" data-hand="spacing: 0.25; flow: vertical; width: 70"></div>
+        <div class="hand fan drop-stack drop-stack-3" data-stack-type="drop" data-hand="spacing: 0.25; flow: vertical; width: 70"></div>
+      </div>
+      <div class='player-stats'>
+        <li><label>In shared stacks:</label> <span class='ace-stack-count'></span></li>
+        <li><label>Cards in stacks:</label> <span class='drop-stack-count'></span></li>
+        <li class='no-count'><label>Total cards out:</label> <span class='total-count'></span></li>
+        <li><label>Kings in shared stack:</label> <span class='ace-stack-king-count'></span></li>
+      </div>
+    </div>
+    <button class='add-player'>Add Player</button>
+  </div>
+
+  <script src="cardsJS/dist/cards.js"></script>
+  <script src="./RacingDemon.js"></script>
+  </body>
+</html>
