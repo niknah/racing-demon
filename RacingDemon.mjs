@@ -637,8 +637,15 @@ class RacingDemonRobotTurn {
         /* eslint-disable-next-line no-empty */
         if(moveOk) {
 
-        } else if(moveLastCards
-          || (this.emptyDropStacks > 1)
+        } else if(
+          moveLastCards
+          || (
+            // have more than one empty drop stack
+            this.emptyDropStacks > 1
+            // Don't put 2, king into empty drop stack because we can only add up/down wards not both ways.
+            && this.mainCard.num != CardNumbers.KingNumber
+            && this.mainCard.num != 2
+          )
         ) {
           moveOk = true;
         } else {
