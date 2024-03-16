@@ -228,7 +228,6 @@ class RacingDemonPlayerWeb extends RacingDemonPlayer {
         const lastCardElem = CardStackDroppable.getTopNonBlankCard(this.$takeStack.get(0));
         if(lastCardElem && !lastCardElem.classList.contains('ui-draggable')) {
           this.mainStackDraggable.makeCardDraggable(lastCardElem);
-// TODO: bug here sometimes it is draggable but not clickable
           lastCardElem.addEventListener(
             'click', this.flipMainStackEvent
           );
@@ -390,7 +389,7 @@ class RacingDemonPlayerWeb extends RacingDemonPlayer {
         if(!cardElem || !cardElem.get(0)) {
           return false;
         }
-// TODO
+
         if(!cardElem.get(0).parentNode) {
           console.error('accept. no parent node', cardElem, cardElem.get(0));
           return false;
@@ -541,7 +540,6 @@ class RacingDemonRobotTurn {
     for(const from of this.firstLast) {
       let toUpto = 0;
 
-      // check middle of stack move to another stack
 //        const fromCard = Card.cardElemToCard(cardObj.cardElem);
       const fromCard = from.first;
       for(const to of this.firstLast) {
@@ -636,10 +634,6 @@ class RacingDemonRobotTurn {
 
         } else if(moveLastCards
           || (this.emptyDropStacks > 1)
-//          || (
-//            this.player.randomRobotMoveTopToStack >= 0
-//            && this.mainCard.num >= this.player.randomRobotMoveTopToStack
-//          )
         ) {
           moveOk = true;
         } else {
@@ -728,12 +722,6 @@ class RacingDemonRobotTurn {
     }
     return null;
   }
-
-  // TODO: Rare move : Can moving drop stack to drop stack reveal a card
-  //   that can be put into the ace stack
-  moveDropStackToDropStack() {
-  }
-
 
   setPlayer(player) {
     this.player = player;
@@ -879,24 +867,6 @@ console.log('playerMove', this.player.playerId, move);
     player.robotTimeoutId = setTimeout(() => RacingDemonRobotTurn.doPlayerTurn(racingDemon, player), firstTimeout);
   }
 
-//  static startAllPlayers(racingDemon) {
-//    for(let p = 0; p < this.racingDemon.players.length; ++p ) {
-//
-//      const player = this.racingDemon.players[p];
-//      RacingDemonRobotTurn.startPlayerTimer(racingDemon, player);
-
-//      if(!player.robotStep) {
-//        player.robotStep = 0.9 + (Math.random()*0.2);
-//        player.robotStepUpto = 0;
-//      }
-//      const origUpto = player.robotStepUpto;
-//      player.robotStepUpto += player.robotStep;
-//
-//      if(Math.floor(origUpto) != Math.floor(player.robotStepUpto)) {
-//          this.robotDoNextStep(player);
-//      }
-//    }
-//  }
 }
 
 
@@ -921,9 +891,25 @@ class RacingDemon {
   }
 
   debugNextMove(player, dragElement) {
-    const move = RacingDemonRobotTurn.getNextMove(this, player);
+    if(!config.hintMove) {
+      return;
+    }
+
     const $nextMove = $('.next-move',this.div);
+    const r = this.getHintNextMove(player, dragElement);
+    if(r.status == 'ok') {
+      $nextMove.addClass('next-move-ok');
+    } else {
+      $nextMove.removeClass('next-move-ok');
+    }
+
+    $nextMove.html(`${r.status}: ${r.message}`);
+  }
+
+  getHintNextMove(player, dragElement) {
+    const move = RacingDemonRobotTurn.getNextMove(this, player);
     let status = 'ok';
+    let message = '';
     if(move) {
       const cardCode = RacingDemon.getCardCodeFromElement(move.fromCard);
       if(dragElement) {
@@ -934,23 +920,17 @@ class RacingDemon {
       } else {
         status = 'not same';
       }
-      $nextMove.html(`${status}: ${cardCode} -> ${move.toStack.className}`);
+      message=`${cardCode} -> ${move.toStack.className} ${move.type}`;
     } else {
       status = (dragElement === null) ? 'ok' : 'not same';
-      $nextMove.html(`${status}: flip main stack`);
+      message=`flip main stack`;
     }
-    if(status == 'ok') {
-      $nextMove.addClass('next-move-ok');
-    } else {
-      $nextMove.removeClass('next-move-ok');
-    }
+    return {status, message};
   }
 
   onPlayerBeforeDrop(player, event) {
     if(this.playerId == player.playerId) {
-      if(config.hintMove) {
-        this.debugNextMove(player, event.dragElement);
-      }
+      this.debugNextMove(player, event.dragElement);
     }
   }
 
