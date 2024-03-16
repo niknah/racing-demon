@@ -572,7 +572,7 @@ class RacingDemonRobotTurn {
   }
 
   isMoveToStackTooQuick(playerId, droppable, lastCard) {
-    if(config.robotTest!==null || this.checkTooQuick) {
+    if(config.robotTest!==null || !this.checkTooQuick) {
       return false;
     }
     const mSecsSinceLastDrop = (new Date().getTime())-droppable.lastCardDrop;
@@ -834,7 +834,7 @@ console.log('playerMove', this.player.playerId, move);
   static getNextMove(racingDemon, player) {
     const racingDemonRobotTurn = new RacingDemonRobotTurn(racingDemon);
     racingDemonRobotTurn.setPlayer(player);
-    racingDemonRobotTurn.setCheckTooQuick();
+    racingDemonRobotTurn.setCheckTooQuick(false);
     return racingDemonRobotTurn.robotFindNextStep();
   }
 
