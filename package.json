@@ -1,0 +1,11 @@
+{
+  "type": "module",
+  "scripts": {
+    "build": "npx esbuild RacingDemon.mjs --bundle --outdir=esbuild.dist",
+    "dist": "cd cardsJS; npm install; npx gulp dist",
+    "pages": "npm run build; cp -ua cards *.css index.html esbuild.dist/* pages/; cp -a cardsJS/dist pages/cardsJS/;",
+    "all": "npm run build; npm run dist; npm run pages"
+  },
+  "dependencies": {
+  }
+}
