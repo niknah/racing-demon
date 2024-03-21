@@ -1,7 +1,7 @@
 {
   "type": "module",
   "scripts": {
-    "preview": "npx vite preview",
+    "dev": "npx vite dev",
     "build": "npx vite build",
     "build_cardsJS": "cd cardsJS; npm install; npx gulp dist",
     "all": " npm run build_cardsJS; npm run build;"

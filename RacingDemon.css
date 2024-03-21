@@ -78,6 +78,10 @@ body .hand.hhand-compact img.card-code-EMPTY:nth-child(n+1) {
 	visibility: hidden;
 }
 
+.robot-player .card-code-RED_BACK {
+	filter: hue-rotate(230deg);
+}
+
 .player-area {
 	padding: 15px;
 	border-radius: 10px;

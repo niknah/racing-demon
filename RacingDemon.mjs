@@ -2,6 +2,7 @@
 
 import {CardStackDroppable, CardStackDraggable, CardStackElement} from './CardDragDrop.mjs';
 import {cardNumbers,CardNumbers} from './CardNumbers.mjs';
+import NetworkClient from './NetworkClient.mjs';
 import Card from './Card.mjs';
 import CardStack from './CardStack.mjs';
 import TimerCount from './TimerCount.mjs';
@@ -207,6 +208,12 @@ class RacingDemonPlayerWeb extends RacingDemonPlayer {
     this.playArea = playArea;
 
     return this.initGui(div);
+  }
+
+  startPlayerRobotTimer(racingDemon) {
+    if(RacingDemonRobotTurn.startPlayerTimer(racingDemon, this) !== null) {
+      this.div.classList.add('robot-player');
+    }
   }
 
   initGui(div) {
@@ -526,7 +533,7 @@ class RacingDemonRobotTurn {
         continue;
       }
 
-      if(this.findCardToAceStackMove(from.first, from.firstElem, false)) {
+      if(this.findCardToAceStackMove(from.first, from.firstElem, true)) {
         // we can move the first card to an ace stack
         // Let's move the 2nd card down
         return {
@@ -759,6 +766,13 @@ class RacingDemonRobotTurn {
   }
 
   robotFindNextStep() {
+    const aceStackMove = this.findMainToAceStackMove();
+    if(aceStackMove) {
+      return aceStackMove;
+    }
+
+    // drop stack to ace stack first because we 
+    // may have exposed a card with a move PreFirstToAceDropStack earlier.
     const dropToAceMove = this.findDropStackToAceStackMove();
     if(dropToAceMove) {
       return dropToAceMove;
@@ -779,11 +793,6 @@ class RacingDemonRobotTurn {
     const firstToAceDropStackMove = this.findPreFirstToAceDropStackMove();
     if(firstToAceDropStackMove) {
       return firstToAceDropStackMove;
-    }
-
-    const aceStackMove = this.findMainToAceStackMove();
-    if(aceStackMove) {
-      return aceStackMove;
     }
   }
 
@@ -877,6 +886,7 @@ console.log('playerMove', this.player.playerId, move);
       firstTimeout = player.getRandomTimeout(racingDemon.robotTimerMSecs);
     }
     player.robotTimeoutId = setTimeout(() => RacingDemonRobotTurn.doPlayerTurn(racingDemon, player), firstTimeout);
+    return player.robotTimeoutId;
   }
 
 }
@@ -890,6 +900,8 @@ class RacingDemon {
     this.robotTimerMSecs = 10000;
     this.gameFinished = false;
     this.gameStartTime = new Date().getTime();
+    this.networkClient = null;
+    this.setupNetworkClient();
 
     if(!playersCount) {
       playersCount = 2;
@@ -900,6 +912,23 @@ class RacingDemon {
         player.randomRobotMoveTopToStack = -1;
       }
     }
+  }
+
+  setupNetworkClient() {
+    if(document.location.search) {
+      const params = URLSearchParams(document.location.search.substring(1))
+      if(params.gameId) {
+        this.networkClient = new NetworkClient(params.gameId);
+
+        this.networkClient.onPlayerMove((obj) => this.onRemotePlayerMove(obj));
+      }
+    }
+  }
+
+  onRemotePlayerMove(obj) {
+    // TODO:
+    // obj.fromCard, obj.toStack
+    console.log('remote player move', obj);
   }
 
   debugNextMove(player, dragElement) {
@@ -966,7 +995,6 @@ class RacingDemon {
     cardPlayer.onFlipMainStack((player, event) => this.onPlayerFlipMainStack(player, event));
     this.players[playerId]=cardPlayer;
     cardPlayer.initCards();
-    RacingDemonRobotTurn.startPlayerTimer(this, cardPlayer);
     return cardPlayer;
   }
 
@@ -988,13 +1016,13 @@ class RacingDemon {
         return false;
       }
 
-console.log('save timer counts, average mSecs',thisPlayer.mSecsSinceCardEvent(), TimerCount.timerCountsToStr(thisPlayer.timerCounts));
       for(const timerCount of Object.values(thisPlayer.timerCounts)) {
         if(!timerCount.count) {
           hasNoCount = true;
         }
       }
       if(!hasNoCount) {
+console.log('save timer counts, average mSecs',thisPlayer.mSecsSinceCardEvent(), TimerCount.timerCountsToStr(thisPlayer.timerCounts));
         localStorage.setItem('lastTimerCounts',JSON.stringify(thisPlayer.timerCounts));
       }
     }
@@ -1045,7 +1073,6 @@ console.log('save timer counts, average mSecs',thisPlayer.mSecsSinceCardEvent(),
   }
 
   createAceStackDroppable(aceStack) {
-
     const droppable = new CardStackDroppable($(aceStack),{
       drop: (event, dragElement) => {
         droppable.lastCardDrop = new Date().getTime();
@@ -1204,11 +1231,13 @@ console.log('save timer counts, average mSecs',thisPlayer.mSecsSinceCardEvent(),
     for(let p = 0; p < this.players.length; ++p) {
       const player = this.players[p];
       player.createGui(div);
+      player.startPlayerRobotTimer(this);
     }
 
     $('.add-player').on('click',() => {
       const cardPlayer = this.addPlayer(this.players.length)
       cardPlayer.createGui(div);
+      cardPlayer.startPlayerRobotTimer(this);
       this.updateStackCounts();
       this.updatePlayerRanks();
     });
@@ -1246,7 +1275,6 @@ class Lobby {
 window.racingDemon = racingDemon; // TODO:
     return true;
   }
-
 }
 
 $(() => {
