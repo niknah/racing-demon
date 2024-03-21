@@ -11,7 +11,7 @@ git submodule update
 npm run all
 ```
 
-Then view the file pages/index.html with a web browser.
+Then view the file docs/index.html with a web browser.
 
 
 ### Practice...
