@@ -33,7 +33,7 @@ body .vhand-compact img.card:first-child {
 }
 
 body .hand img.card-code-EMPTY:nth-child(1) {
-	background: url(cards/BLANK.svg);
+	background: url(cardsJS/dist/cards/BLANK.svg);
 	background-size: contain;
 	background-repeat: no-repeat;
 	/*

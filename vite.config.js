@@ -1,6 +1,7 @@
 import { viteStaticCopy } from 'vite-plugin-static-copy'
 
 export default {
+  base: "./",
   build: {
     outDir: "docs",
   },
