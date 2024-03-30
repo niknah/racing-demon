@@ -300,8 +300,10 @@ export class CardStackDraggable {
       cardElem.style.position='relative';
 //      arr.push(cardElem);
     }
-    const lastChild = this.stackElem.children[this.stackElem.children.length-1]
-    this.makeCardDraggable(lastChild);
+    if(!this.isTopCardBack()) {
+      const lastChild = this.getTopCard(); //this.stackElem.children[this.stackElem.children.length-1]
+      this.makeCardDraggable(lastChild);
+    }
     return arr;
   }
 
