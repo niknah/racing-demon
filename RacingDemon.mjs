@@ -1225,7 +1225,7 @@ console.log('askContinue',askContinue,isHuman, 'player', player.playerId ,this.p
       for(const dropStack of player.dropStacks) {
         dropStackCount += dropStack.children.length-1;
       }
-      byPlayerId[player.playerId]={aceStackCount:0, topKings:0, dropStackCount, playerId: player.playerId};
+      byPlayerId[player.playerId]={aceStackCount:0, topKings:0, dropStackCount, playerId: player.playerId, player};
     }
 
     for(const aceStack of this.aceStackElems) {
@@ -1250,16 +1250,27 @@ console.log('askContinue',askContinue,isHuman, 'player', player.playerId ,this.p
     const byPlayerIds = this.getStackCounts();
     const arr=Object.values(byPlayerIds);
     arr.sort((a,b) => {
-      const aTotal = a.aceStackCount + a.dropStackCount;
-      const bTotal = b.aceStackCount + b.dropStackCount;
-      let diff = bTotal - aTotal;
-      if(diff===0) {
-        diff = b.topKings - a.topKings;
-      }
-      if(diff===0) {
-        const aTime = (a.finishTime - a.startTime);
-        const bTime = (b.finishTime - b.startTime);
-        diff = bTime - aTime;
+      let diff;
+      const aPlayer = a.player;
+      const bPlayer = b.player;
+
+      if(aPlayer.finishTime) {
+        if(bPlayer.finishTime) {
+          const aTime = (aPlayer.finishTime - aPlayer.startTime);
+          const bTime = (bPlayer.finishTime - bPlayer.startTime);
+          diff = aTime - bTime;
+        } else {
+          diff = -1;
+        }
+      } else if(bPlayer.finishTime) {
+        diff = 1;
+      } else {
+        const aTotal = a.aceStackCount + a.dropStackCount;
+        const bTotal = b.aceStackCount + b.dropStackCount;
+        diff = bTotal - aTotal;
+        if(diff===0) {
+          diff = b.topKings - a.topKings;
+        }
       }
       return diff;
     });
