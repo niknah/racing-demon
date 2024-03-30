@@ -1053,7 +1053,11 @@ class RacingDemon {
       }
       if(!hasNoCount) {
 console.log('save timer counts, average mSecs',thisPlayer.mSecsSinceCardEvent(), TimerCount.timerCountsToStr(thisPlayer.timerCounts));
-        localStorage.setItem('lastTimerCounts',JSON.stringify(thisPlayer.timerCounts));
+        const hasSavedTimerCount = localStorage.getItem('lastTimerCounts')?true:false;
+        // Save timer counts when player has finished or if they haven't saved before
+        if(!hasSavedTimerCount || thisPlayer.hasFinished) {
+          localStorage.setItem('lastTimerCounts',JSON.stringify(thisPlayer.timerCounts));
+        }
       }
     }
     return true;
