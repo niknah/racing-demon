@@ -1353,15 +1353,21 @@ class Lobby {
   }
   
   initGui() {
+    const prevPlayersCount = localStorage.getItem('playersCount',6);
+    this.playersCountInput=this.div.querySelector('#players-count');
+    if(prevPlayersCount) {
+      this.playersCountInput.value = prevPlayersCount;
+    }
     this.div.querySelector('.start-game')
       .addEventListener('click',() => this.startGame());
   }
 
   startGame() {
-    const playersCount = parseInt(this.div.querySelector('#players-count').value);
+    const playersCount = parseInt(this.playersCountInput.value);
     if(playersCount<=0) {
       return false;
     }
+    localStorage.setItem('playersCount',playersCount);
     const racingDemon = new RacingDemon(playersCount);
     const playArea=document.querySelector('#play-area');
     this.div.classList.add('hide-area');
