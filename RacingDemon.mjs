@@ -484,7 +484,7 @@ class RacingDemonRobotTurn {
 
     // If someone drops on a stack,
     // there needs to be some time for another player to look at it first.
-    this.minMSecsBetweenDrop = 1500;
+    this.minMSecsBetweenDrop = 2000;
     this.checkTooQuick = true;
   }
 
