@@ -131,6 +131,10 @@ body .hand.hhand-compact img.card-code-EMPTY:nth-child(n+1) {
 	list-style: none;
 }
 
+.player-finished {
+	border: 1px solid #080;
+}
+
 /* used in player stats */
 .no-count {
 	display: none;

@@ -1281,7 +1281,10 @@ console.log('askContinue',askContinue,isHuman, 'player', player.playerId ,this.p
       let finishStr='';
       if(player.hasFinished) {
         const timeStr = RacingDemonPlayer.mSecsToTimeStr(player.finishTime - player.startTime);
-        finishStr = `Took ${timeStr}`;
+        finishStr = `<br />Took ${timeStr}`;
+      }
+      if(player.hasFinished) {
+        player.div.classList.add('player-finished');
       }
       $('.player-rank', player.div).html(`Rank #${rank+1} ${finishStr}`);
     }
