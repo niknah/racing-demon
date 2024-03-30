@@ -73,7 +73,7 @@ class RacingDemonPlayer {
       this.randomRobotSpeed = 1;
       this.randomRobotMoveTopToStack = CardNumbers.KingNumber - config.robotTest;
     } else {
-      this.randomRobotSpeed = 1 + (Math.random()*1);
+      this.randomRobotSpeed = 0.9 + (Math.random()*0.7);
 //      const randomMoveTopToStack = Math.floor(Math.random()*4)-1;
       const randomMoveTopToStack = Math.floor(Math.random()*4);
       if(randomMoveTopToStack >= 0) {
@@ -184,14 +184,18 @@ class RacingDemonPlayerWeb extends RacingDemonPlayer {
     this.$onFlipMainStack.add(func);
   }
 
+  updateDebugRobotMoves() {
+    $('.debug-move',this.div).html(
+      JSON.stringify(this.robotMoves,Object.keys(this.robotMoves).sort(),4)+
+      "\n"+
+      TimerCount.timerCountsToStr(this.timerCounts)
+    );
+  }
+
   increaseRobotMove(type) {
     super.increaseRobotMove(type);
     if(config.debugPlayer || config.robotTest !== null) {
-      $('.debug-move',this.div).html(
-        JSON.stringify(this.robotMoves,Object.keys(this.robotMoves).sort(),4)+
-        "\n"+
-        TimerCount.timerCountsToStr(this.timerCounts)
-      );
+      this.updateDebugRobotMoves();
     }
   }
 
@@ -236,12 +240,14 @@ class RacingDemonPlayerWeb extends RacingDemonPlayer {
     this.mainStackDraggable = new CardStackDraggable(this.$takeStack, {
       backCard: CardStackDraggable.redBack,
       stop: () => {
-        const lastCardElem = CardStackDroppable.getTopNonBlankCard(this.$takeStack.get(0));
-        if(lastCardElem && !lastCardElem.classList.contains('ui-draggable')) {
-          this.mainStackDraggable.makeCardDraggable(lastCardElem);
-          lastCardElem.addEventListener(
-            'click', this.flipMainStackEvent
-          );
+        if(!this.mainStackDraggable.isTopCardBack()) {
+          const lastCardElem = this.mainStackDraggable.getTopCard();
+          if(lastCardElem && !lastCardElem.classList.contains('ui-draggable')) {
+            this.mainStackDraggable.makeCardDraggable(lastCardElem);
+            lastCardElem.addEventListener(
+              'click', this.flipMainStackEvent
+            );
+          }
         }
 
         const mainStackCount = this.getMainStackCount();
@@ -370,7 +376,7 @@ class RacingDemonPlayerWeb extends RacingDemonPlayer {
         'click', this.flipMainStackEvent
       );
     }
-    CardStackDroppable.applyStyles(this.$takeStack);
+    cards.applyStyles(this.$takeStack);
     this.updateMainStackCount(this.getMainStackCount());
     this.increaseTimerCount('main');
   }
@@ -1211,6 +1217,12 @@ console.log('save timer counts, average mSecs',thisPlayer.mSecsSinceCardEvent(),
     acesStackDiv.appendChild(aceStackElem);
     this.aceStacksDroppable.push(this.createAceStackDroppable(aceStackElem));
     this.aceStackElems.push(aceStackElem);
+  }
+
+  updateDebugRobotMoves() {
+    for(const player of this.players) {
+      player.updateDebugRobotMoves();
+    }
   }
 
   initTimerCounts() {
