@@ -607,25 +607,40 @@ class RacingDemonRobotTurn {
     ;
   }
 
+  findRemainingMainStackToDropMove() {
+    if(!this.mainCard) {
+      return null;
+    }
+    // check if we have enough blank spots to move all remaining cards to
+    const remainingMainCards = this.player.getMainStackCount();
+
+    if(remainingMainCards <= this.firstLast.length) {
+      if(this.emptyDropStacks >= remainingMainCards) {
+        let blankDropStack = null;
+        for(const fl of this.firstLast) {
+          if(!fl.first) {
+            blankDropStack = fl.dropStack;
+          }
+        }
+        const move = {
+          type:'RemainingMainStackToDropMove',
+          fromCard: this.mainCardElem,
+          toStack: blankDropStack,
+          waitMSecs: 500,
+        };
+        return move;
+      }
+    }
+    return null;
+  }
+
   findMainStackToDropMove() {
     if(!this.mainCard) {
       return null;
     }
 
-    let type = 'MainToDropStack';
-
-    // check if we have enough blank spots to move all remaining cards to
-    let moveLastCards = false; 
-    const remainingMainCards = this.player.getMainStackCount();
-
     let waitMSecs = null;
-    if(remainingMainCards <= this.firstLast.length) {
-      if(this.emptyDropStacks >= remainingMainCards) {
-        moveLastCards = true;
-        type = 'LastMainToDropStack';
-        waitMSecs = 500;
-      }
-    }
+    let type = 'MainToDropStack';
 
     for(const fl of this.firstLast) {
       let moveOk = false;
@@ -651,14 +666,11 @@ class RacingDemonRobotTurn {
         if(moveOk) {
 
         } else if(
-          moveLastCards
-          || (
-            // have more than one empty drop stack
-            this.emptyDropStacks > 1
-            // Don't put 2, king into empty drop stack because we can only add up/down wards not both ways.
-            && this.mainCard.num != CardNumbers.KingNumber
-            && this.mainCard.num != 2
-          )
+          // have more than one empty drop stack
+          this.emptyDropStacks > 1
+          // Don't put 2, king into empty drop stack because we can only add up/down wards not both ways.
+          && this.mainCard.num != CardNumbers.KingNumber
+          && this.mainCard.num != 2
         ) {
           moveOk = true;
         } else {
@@ -772,6 +784,11 @@ class RacingDemonRobotTurn {
   }
 
   robotFindNextStep() {
+    const remainingMainStackMove = this.findRemainingMainStackToDropMove();
+    if(remainingMainStackMove) {
+      return remainingMainStackMove;
+    }
+
     const aceStackMove = this.findMainToAceStackMove();
     if(aceStackMove) {
       return aceStackMove;
