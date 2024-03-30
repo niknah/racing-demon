@@ -265,6 +265,11 @@ class RacingDemonPlayerWeb extends RacingDemonPlayer {
       this.$takeStack.get(0).children.length-1;
   }
 
+  findCardFromCode(code) {
+    // TODO: look in main stack
+    // look in drop stack
+  }
+
   updateStatCount(countElem, count) {
     countElem.innerHTML = count || 0;
     if(count) {
@@ -396,6 +401,13 @@ class RacingDemonPlayerWeb extends RacingDemonPlayer {
           CardStackDroppable.applyStyles($(dropStack));
           this.fireOnAfterDrop(dropStack, dragElement);
         },0);
+
+        if(this.networkClient) {
+          this.networkClient.sendPlayerMove({
+            fromCard: RacingDemon.getCardCodeFromElement(dragElement),
+            toStack: 'drop-'+dropStack.getAttribute('data-drop-stack'),
+          });
+        }
       },
       accept: (cardElem) => {
         if(!cardElem || !cardElem.get(0)) {
@@ -921,13 +933,21 @@ class RacingDemon {
         this.networkClient = new NetworkClient(params.gameId);
 
         this.networkClient.onPlayerMove((obj) => this.onRemotePlayerMove(obj));
+        this.networkClient.onPlayerJoin((obj) => this.onRemotePlayerJoin(obj));
       }
     }
   }
 
+
+  onRemotePlayerJoin(obj) {
+    // TODO: addPlayer, send
+  }
+
   onRemotePlayerMove(obj) {
     // TODO:
-    // obj.fromCard, obj.toStack
+    // obj.fromCard, obj.toStack, obj.playerId
+    // Find card
+    //  CardStackDraggable.dragCardToStack(move.fromCard, move.toStack);
     console.log('remote player move', obj);
   }
 
@@ -1085,6 +1105,13 @@ console.log('save timer counts, average mSecs',thisPlayer.mSecsSinceCardEvent(),
           const playerId = dragElement.getAttribute('data-player');
           this.players[playerId].fireOnAfterDrop(aceStack, dragElement);
         },0);
+
+        if(this.networkClient) {
+          this.networkClient.sendPlayerMove({
+            fromCard: RacingDemon.getCardCodeFromElement(dragElement),
+            toStack: 'ace-'+aceStack.getAttribute('data-ace-stack'),
+          });
+        }
       },
       isDropAccept: (stack, dragElement) => {
         const topCardElem = droppable.getTopNonBlankCard();
