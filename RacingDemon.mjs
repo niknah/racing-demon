@@ -785,6 +785,10 @@ class RacingDemonRobotTurn {
     }
 
     // can we put drop stack top to drop stack bottom
+    // Do this before main to drop stack move 
+    //  so that we don't put a card on top of a drop stack here 
+    //  which may prevent an inter drop stack move which can free up a drop stack
+    //
     const stackMove = this.findInterDropStackMove();
     if(stackMove) {
       return stackMove;
@@ -904,7 +908,10 @@ class RacingDemon {
     this.robotPlayers = [];
     this.playerId = 0;
     this.robotTimerMSecs = 10000;
+
     this.gameFinished = false;
+    this.continuePlaying = false;
+
     this.gameStartTime = new Date().getTime();
     this.networkClient = null;
     this.setupNetworkClient();
@@ -1038,18 +1045,40 @@ console.log('save timer counts, average mSecs',thisPlayer.mSecsSinceCardEvent(),
   onPlayerFinish(player) {
     const wonResult = this.hasPlayerWon() ? 'finished' : 'won';
 
+    let isHuman = false;
     if(config.robotTest===null) {
-      this.saveTimerCounts(this.playerId);
+      isHuman = player.playerId == this.playerId
+      if(
+        isHuman
+        || !this.players[this.playerId].hasFinished
+      ) {
+        // is human player that has finished
+        // or human is still playing and robot has finished
+        this.saveTimerCounts(this.playerId);
+      }
     }
 
     const gameMSecs = new Date().getTime() - this.gameStartTime;
     const timeStr = RacingDemonPlayer.mSecsToTimeStr(gameMSecs);
     this.gameFinished = true;
     this.updatePlayerRanks();
-    if(config.robotTest!==null
-      || window.confirm(`Player #${player.playerId+1} has ${wonResult}\nTime taken: ${timeStr}\nContinue playing?`)
-    ) {
+    let askContinue = true;
+    if(config.robotTest!==null) {
       this.gameFinished = false;
+      askContinue = false;
+    } else if(this.continuePlaying) {
+      // continue playing till the end, don't ask continue again if the robot player finished
+      if(!isHuman) {
+        askContinue = false;
+        this.gameFinished = false;
+      }
+    } 
+
+    if(askContinue) {
+      if(window.confirm(`Player #${player.playerId+1} has ${wonResult}\nTime taken: ${timeStr}\nContinue playing?`)) {
+        this.continuePlaying = true;
+        this.gameFinished = false;
+      }
     }
   }
 
