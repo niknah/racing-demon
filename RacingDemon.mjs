@@ -251,13 +251,14 @@ class RacingDemonPlayerWeb extends RacingDemonPlayer {
         }
 
         const mainStackCount = this.getMainStackCount();
+        this.updateMainStackCount(mainStackCount);
+        this.fireOnMainDragStop({player:this});
+
         if(mainStackCount === 0 && !this.finishTime) {
           this.finishTime = new Date().getTime();
           this.hasFinished = true;
           this.fireOnFinish();
         }
-        this.updateMainStackCount(mainStackCount);
-        this.fireOnMainDragStop({player:this});
       },
       clickCardBack: () => this.flipMainStack()
     });
