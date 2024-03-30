@@ -1081,26 +1081,46 @@ console.log('save timer counts, average mSecs',thisPlayer.mSecsSinceCardEvent(),
 
     const gameMSecs = new Date().getTime() - this.gameStartTime;
     const timeStr = RacingDemonPlayer.mSecsToTimeStr(gameMSecs);
-    this.gameFinished = true;
     this.updatePlayerRanks();
     let askContinue = true;
     if(config.robotTest!==null) {
-      this.gameFinished = false;
       askContinue = false;
     } else if(this.continuePlaying) {
       // continue playing till the end, don't ask continue again if the robot player finished
-      if(!isHuman) {
-        askContinue = false;
-        this.gameFinished = false;
-      }
+      askContinue = false;
     } 
 
+    if(isHuman) {
+      askContinue = true;
+    }
+console.log('askContinue',askContinue,isHuman, 'player', player.playerId ,this.playerId);
+
+
+    // To quickly finish a players game, press F12, run... racingDemon.players[1].poppedCards.cards=racingDemon.players[1].cards.cards=[]
+
+    // Mark game as finished so the robot doesn't continue playing while we wait for the player to confirm
+    const gameFinished = this.gameFinished;
+    this.gameFinished = true;
+
+    const playerName = this.getPlayerName(player.playerId);
     if(askContinue) {
-      if(window.confirm(`Player #${player.playerId+1} has ${wonResult}\nTime taken: ${timeStr}\nContinue playing?`)) {
+      if(window.confirm(`${playerName} has ${wonResult}\nTime taken: ${timeStr}\nContinue playing?`)) {
         this.continuePlaying = true;
         this.gameFinished = false;
+      } else {
+        this.continuePlaying = false;
+        this.gameFinished = true;
       }
+    } else {
+      this.gameFinished =  gameFinished;
     }
+  }
+
+  getPlayerName(playerId) {
+    if(playerId == this.playerId) {
+      return 'You';
+    }
+    return `Player #${playerId+1}`;
   }
 
   getLastTimerCounts() {
